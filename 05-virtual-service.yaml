@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: backend-routing
+  namespace: three-tier
+spec:
+  hosts:
+    - backend.three-tier.svc.cluster.local
+  http:
+    - route:
+        - destination:
+            host: backend.three-tier.svc.cluster.local
+            port:
+              number: 80
+      timeout: 5s
+      retries:
+        attempts: 2
+        perTryTimeout: 2s
+        retryOn: 5xx,connect-failure,reset

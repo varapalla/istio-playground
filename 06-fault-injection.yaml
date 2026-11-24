@@ -1,0 +1,43 @@
+# Apply only while testing fault injection.
+# This VirtualService replaces the normal backend-routing VirtualService
+# for this host; delete it to return to the normal routing policy.
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: backend-routing
+  namespace: three-tier
+spec:
+  hosts:
+    - backend.three-tier.svc.cluster.local
+  http:
+    - match:
+        - uri:
+            exact: /slow
+      fault:
+        delay:
+          percentage:
+            value: 100
+          fixedDelay: 8s
+      route:
+        - destination:
+            host: backend.three-tier.svc.cluster.local
+            port:
+              number: 80
+    - match:
+        - uri:
+            exact: /error
+      fault:
+        abort:
+          percentage:
+            value: 100
+          httpStatus: 500
+      route:
+        - destination:
+            host: backend.three-tier.svc.cluster.local
+            port:
+              number: 80
+    - route:
+        - destination:
+            host: backend.three-tier.svc.cluster.local
+            port:
+              number: 80
